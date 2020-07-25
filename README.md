@@ -1,3 +1,5 @@
+<img src="./memory-compressed-attention.png" width="600px"></img>
+
 ## Memory Compressed Attention
 
 Implementation of the Self-Attention layer of the proposed <a href="https://arxiv.org/abs/1801.10198">Memory-Compressed Attention</a>, in Pytorch.
