@@ -2,7 +2,31 @@
 
 ## Memory Compressed Attention
 
-Implementation of the Self-Attention layer of the proposed <a href="https://arxiv.org/abs/1801.10198">Memory-Compressed Attention</a>, in Pytorch.
+Implementation of the Self-Attention layer of the proposed <a href="https://arxiv.org/abs/1801.10198">Memory-Compressed Attention</a>, in Pytorch. This repository offers both the causal and non-causal variant, and will take care of the padding if the sequence length is not divisible by the compression ratio.
+
+## Install
+
+```bash
+$ pip install memory_compressed_attention
+```
+
+## Usage
+
+```python
+import torch
+from memory_compressed_attention import MemoryCompressedAttention
+
+attn = MemoryCompressedAttention(
+    dim = 512,
+    heads = 8,                 # number of heads
+    causal = False,            # auto-regressive or not
+    compression_factor = 3,    # compression ratio
+    dropout = 0.1              # dropout post-attention
+)
+
+x = torch.randn(1, 1024, 512)
+attn(x) # (1, 1024, 512)
+```
 
 ## Citations
 
