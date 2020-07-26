@@ -41,7 +41,7 @@ class MemoryCompressedAttention(nn.Module):
         self.null_k = nn.Parameter(torch.zeros(1, 1, dim))
         self.null_v = nn.Parameter(torch.zeros(1, 1, dim))
 
-    def forward(self, x):
+    def forward(self, x, input_mask = None):
         b, t, d, h, cf, device = *x.shape, self.heads, self.compression_factor, x.device
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
 
@@ -67,16 +67,28 @@ class MemoryCompressedAttention(nn.Module):
 
         # causal masking, if needed
         if self.causal:
-            mask_q = mask_k = torch.arange(t, device = device)
+            mask_q = mask_k = torch.arange(t, device=device)
 
             if padding != 0:
                 mask_k = F.pad(mask_k, (padding, 0))
 
             mask_k, _ = mask_k.reshape(-1, cf).max(dim=-1)
             mask = mask_q[:, None] < mask_k[None, :]
-            mask = F.pad(mask, (1, 0), value = False)
+            mask = F.pad(mask, (1, 0), value=False)
 
             dots.masked_fill_(mask[None, None, ...], -float('-inf'))
+            del mask
+
+        # input masking
+        if input_mask is not None:
+            mask_q = mask_k = input_mask
+            if padding != 0:
+                mask_k = F.pad(mask_k, (padding, 0), value=True)
+            mask_k = mask_k.reshape(b, -1, cf).sum(dim=-1) > 0
+            mask = mask_q[:, None, :, None] < mask_k[:, None, None, :]
+            mask = F.pad(mask, (1, 0), value=True)
+
+            dots.masked_fill_(~mask, -float('-inf'))
             del mask
 
         # dropout

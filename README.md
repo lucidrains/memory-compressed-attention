@@ -27,7 +27,9 @@ attn = MemoryCompressedAttention(
 )
 
 x = torch.randn(1, 1024, 512)
-attn(x) # (1, 1024, 512)
+mask = torch.ones(1, 1024).bool()
+
+attn(x, input_mask = mask) # (1, 1024, 512)
 ```
 
 ## Citations
