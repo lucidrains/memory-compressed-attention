@@ -48,7 +48,7 @@ class MemoryCompressedAttention(nn.Module):
         # make sure keys and values sequence lengths
         # are divisible by the compression factor
         padding = cf - (t % cf)
-        if padding != 0:
+        if padding < cf:
             k, v = map(lambda t: F.pad(t, (0, 0, padding, 0)), (k, v))
 
         # compress keys and values
@@ -69,7 +69,7 @@ class MemoryCompressedAttention(nn.Module):
         if self.causal:
             mask_q = mask_k = torch.arange(t, device=device)
 
-            if padding != 0:
+            if padding < cf:
                 mask_k = F.pad(mask_k, (padding, 0))
 
             mask_k, _ = mask_k.reshape(-1, cf).max(dim=-1)
@@ -82,7 +82,7 @@ class MemoryCompressedAttention(nn.Module):
         # input masking
         if input_mask is not None:
             mask_q = mask_k = input_mask
-            if padding != 0:
+            if padding < cf:
                 mask_k = F.pad(mask_k, (padding, 0), value=True)
             mask_k = mask_k.reshape(b, -1, cf).sum(dim=-1) > 0
             mask = mask_q[:, None, :, None] < mask_k[:, None, None, :]
