@@ -63,7 +63,6 @@ class MemoryCompressedAttention(nn.Module):
 
         # attention
         dots = torch.einsum('bhid,bhjd->bhij', q, k) * d ** -0.5
-        attn = dots.softmax(dim=-1)
 
         # causal masking, if needed
         if self.causal:
@@ -90,6 +89,9 @@ class MemoryCompressedAttention(nn.Module):
 
             dots.masked_fill_(~mask, -float('-inf'))
             del mask
+
+        # attention
+        attn = dots.softmax(dim=-1)
 
         # dropout
         attn = self.dropout(dots)
