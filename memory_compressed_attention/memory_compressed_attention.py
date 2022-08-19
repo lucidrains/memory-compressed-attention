@@ -64,6 +64,8 @@ class MemoryCompressedAttention(nn.Module):
         # attention
         dots = torch.einsum('bhid,bhjd->bhij', q, k) * d ** -0.5
 
+        mask_value = -torch.finfo(dots.dtype).max
+
         # causal masking, if needed
         if self.causal:
             mask_q = mask_k = torch.arange(t, device=device)
@@ -75,7 +77,7 @@ class MemoryCompressedAttention(nn.Module):
             mask = mask_q[:, None] < mask_k[None, :]
             mask = F.pad(mask, (1, 0), value=False)
 
-            dots.masked_fill_(mask[None, None, ...], -float('-inf'))
+            dots.masked_fill_(mask[None, None, ...], mask_value)
             del mask
 
         # input masking
@@ -87,7 +89,7 @@ class MemoryCompressedAttention(nn.Module):
             mask = mask_q[:, None, :, None] < mask_k[:, None, None, :]
             mask = F.pad(mask, (1, 0), value=True)
 
-            dots.masked_fill_(~mask, -float('-inf'))
+            dots.masked_fill_(~mask, mask_value)
             del mask
 
         # attention
