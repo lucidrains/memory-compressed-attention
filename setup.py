@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
   name = 'memory_compressed_attention',
   packages = find_packages(),
-  version = '0.0.6',
+  version = '0.0.7',
   license='MIT',
   description = 'Memory-Compressed Self Attention',
   long_description_content_type = 'text/markdown',

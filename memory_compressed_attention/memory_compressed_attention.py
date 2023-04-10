@@ -55,8 +55,9 @@ class MemoryCompressedAttention(nn.Module):
         k, v = map(self.compress_fn, (k, v))
 
         # attach a null key and value, in the case that the first query has no keys to pay attention to
-        k = torch.cat((self.null_k, k), dim=1)
-        v = torch.cat((self.null_v, v), dim=1)
+        nk, nv = map(lambda t: t.expand(b, -1, -1), (self.null_k, self.null_v))
+        k = torch.cat((nk, k), dim=1)
+        v = torch.cat((nv, v), dim=1)
 
         # merge heads
         q, k, v = map(lambda t: t.reshape(*t.shape[:2], h, -1).transpose(1, 2), (q, k, v))
