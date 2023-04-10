@@ -96,7 +96,7 @@ class MemoryCompressedAttention(nn.Module):
         attn = dots.softmax(dim=-1)
 
         # dropout
-        attn = self.dropout(dots)
+        attn = self.dropout(attn)
         out = torch.einsum('bhij,bhjd->bhid', attn, v)
 
         # split heads and combine
